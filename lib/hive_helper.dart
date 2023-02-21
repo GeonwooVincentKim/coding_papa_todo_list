@@ -14,6 +14,19 @@ class HiveHelper {
 
   Box<Task>? tasksBox;
 
+  Future reOrder(int oldIndex, int newIndex) async {
+    List<Task> newList = [];
+    newList.addAll(tasksBox!.values);
+
+    final Task item = newList.removeAt(oldIndex);
+    newList.insert(newIndex, item);
+
+    await tasksBox!.clear();
+    await tasksBox!.addAll(newList);
+
+    return;
+  }
+
   Future openBox() async {
     tasksBox = await Hive.openBox(TASK_BOX);
   }

@@ -84,21 +84,18 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   child: TaskTile(
                     task: tasks[index],
                     onDeleted: () {
-                      setState(() {
-                        tasks.removeAt(index);
-                      });
+                      setState(() {});
                     },
                   ),
                 )
             ],
-            onReorder: (int oldIndex, int newIndex) {
-              setState(() {
-                if (oldIndex < newIndex) {
-                  newIndex -= 1;
-                }
-                final Task item = tasks.removeAt(oldIndex);
-                tasks.insert(newIndex, item);
-              });
+            onReorder: (int oldIndex, int newIndex) async {
+              if (oldIndex < newIndex) {
+                newIndex -= 1;
+              }
+
+              await HiveHelper().reOrder(oldIndex, newIndex);
+              setState(() {});
             },
           ),
         );
@@ -144,9 +141,10 @@ class _TaskTileState extends State<TaskTile> {
               key: widget.key,
               value: widget.task.finished,
               onChanged: (checked) {
-                setState(() {
-                  widget.task.finished = checked ?? false;
-                });
+                widget.task.finished = checked!;
+                widget.task.save();
+
+                setState(() {});
               },
             ),
             Expanded(
@@ -166,7 +164,10 @@ class _TaskTileState extends State<TaskTile> {
                 Icons.delete,
                 color: Colors.white,
               ),
-              onPressed: () => widget.onDeleted(),
+              onPressed: () {
+                widget.task.delete();
+                widget.onDeleted();
+              },
             )
           ],
         ),
