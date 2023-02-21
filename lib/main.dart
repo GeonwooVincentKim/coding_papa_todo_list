@@ -46,7 +46,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             autofocus: true,
             onSubmitted: (String text) {
               setState(() {
-                _items.add(Task(title: text));
+                HiveHelper().create(Task(text));
               });
               Navigator.of(context).pop();
             },
@@ -59,43 +59,50 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('To do')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showMyDialog();
-        },
-      ),
-      body: ReorderableListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        proxyDecorator: (Widget child, int index, Animation<double> animation) {
-          return TaskTile(itemIndex: index, onDeleted: () {});
-        },
-        children: <Widget>[
-          for (int index = 0; index < _items.length; index += 1)
-            Padding(
-              key: Key('$index'),
-              padding: const EdgeInsets.all(8.0),
-              child: TaskTile(
-                itemIndex: index,
-                onDeleted: () {
-                  setState(() {
-                    _items.removeAt(index);
-                  });
-                },
-              ),
-            )
-        ],
-        onReorder: (int oldIndex, int newIndex) {
-          setState(() {
-            if (oldIndex < newIndex) {
-              newIndex -= 1;
-            }
-            final Task item = _items.removeAt(oldIndex);
-            _items.insert(newIndex, item);
-          });
-        },
-      ),
+    return FutureBuilder<List<Task>>(
+      future: HiveHelper().read(),
+      builder: (context, snapshot) {
+        List<Task> tasks = snapshot.data ?? [];
+
+        return Scaffold(
+          appBar: AppBar(title: const Text('To do')),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              _showMyDialog();
+            },
+          ),
+          body: ReorderableListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            proxyDecorator: (Widget child, int index, Animation<double> animation) {
+              return TaskTile(task: tasks[index], onDeleted: () {});
+            },
+            children: <Widget>[
+              for (int index = 0; index < tasks.length; index += 1)
+                Padding(
+                  key: Key('$index'),
+                  padding: const EdgeInsets.all(8.0),
+                  child: TaskTile(
+                    task: tasks[index],
+                    onDeleted: () {
+                      setState(() {
+                        tasks.removeAt(index);
+                      });
+                    },
+                  ),
+                )
+            ],
+            onReorder: (int oldIndex, int newIndex) {
+              setState(() {
+                if (oldIndex < newIndex) {
+                  newIndex -= 1;
+                }
+                final Task item = tasks.removeAt(oldIndex);
+                tasks.insert(newIndex, item);
+              });
+            },
+          ),
+        );
+      }
     );
   }
 }
@@ -103,11 +110,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
 class TaskTile extends StatefulWidget {
   TaskTile({
     Key? key,
-    required this.itemIndex,
+    required this.task,
     required this.onDeleted,
   }) : super(key: key);
 
-  final int itemIndex;
+  final Task task;
   final Function onDeleted;
 
   @override
@@ -119,7 +126,6 @@ class _TaskTileState extends State<TaskTile> {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color evenItemColor = colorScheme.primary;
-    final Task item = _items[widget.itemIndex];
 
     return Material(
       child: AnimatedContainer(
@@ -127,7 +133,7 @@ class _TaskTileState extends State<TaskTile> {
         alignment: Alignment.center,
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: item.finished ? Colors.grey : evenItemColor,
+          color: widget.task.finished ? Colors.grey : evenItemColor,
           borderRadius: BorderRadius.circular(12),
         ),
         duration: const Duration(milliseconds: 300),
@@ -136,20 +142,20 @@ class _TaskTileState extends State<TaskTile> {
           children: [
             Checkbox(
               key: widget.key,
-              value: item.finished,
+              value: widget.task.finished,
               onChanged: (checked) {
                 setState(() {
-                  item.finished = checked ?? false;
+                  widget.task.finished = checked ?? false;
                 });
               },
             ),
             Expanded(
               child: Text(
-                item.title,
+                widget.task.title,
                 style: TextStyle(
                   fontSize: 22,
                   color: Colors.white,
-                  decoration: item.finished
+                  decoration: widget.task.finished
                       ? TextDecoration.lineThrough
                       : TextDecoration.none,
                 ),
