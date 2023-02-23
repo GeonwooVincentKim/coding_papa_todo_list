@@ -1,17 +1,9 @@
-import 'package:coding_papa_flutter_todo_list/hive_helper.dart';
-import 'package:coding_papa_flutter_todo_list/task.dart';
+import 'package:coding_papa_flutter_todo_list/old_task.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 final List<Task> _items = [];
 
-void main() async {
-  await Hive.initFlutter();
-  Hive.registerAdapter(TaskAdapter());
-  await HiveHelper().openBox();
-  
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
