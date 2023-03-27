@@ -1,4 +1,5 @@
 import 'package:coding_papa_flutter_todo_list/old_task.dart';
+import 'package:coding_papa_flutter_todo_list/shared.dart';
 import 'package:flutter/material.dart';
 
 class TaskTile extends StatefulWidget {
@@ -20,7 +21,7 @@ class _TaskTileState extends State<TaskTile> {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color evenItemColor = colorScheme.primary;
-    final Task item = _items[widget.itemIndex];
+    final Task item = items[widget.itemIndex];
 
     return Material(
       child: AnimatedContainer(

@@ -1,8 +1,8 @@
 import 'package:coding_papa_flutter_todo_list/old_task.dart';
+import 'package:coding_papa_flutter_todo_list/shared.dart';
 import 'package:coding_papa_flutter_todo_list/task_tile.dart';
 import 'package:flutter/material.dart';
 
-final List<Task> _items = [];
 
 void main() => runApp(const MyApp());
 
@@ -39,7 +39,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             autofocus: true,
             onSubmitted: (String text) {
               setState(() {
-                _items.add(Task(title: text));
+                items.add(Task(title: text));
               });
               Navigator.of(context).pop();
             },
@@ -65,7 +65,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
           return TaskTile(itemIndex: index, onDeleted: () {});
         },
         children: <Widget>[
-          for (int index = 0; index < _items.length; index += 1)
+          for (int index = 0; index < items.length; index += 1)
             Padding(
               key: Key('$index'),
               padding: const EdgeInsets.all(8.0),
@@ -73,7 +73,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 itemIndex: index,
                 onDeleted: () {
                   setState(() {
-                    _items.removeAt(index);
+                    items.removeAt(index);
                   });
                 },
               ),
@@ -84,8 +84,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             if (oldIndex < newIndex) {
               newIndex -= 1;
             }
-            final Task item = _items.removeAt(oldIndex);
-            _items.insert(newIndex, item);
+            final Task item = items.removeAt(oldIndex);
+            items.insert(newIndex, item);
           });
         },
       ),
